@@ -12,16 +12,9 @@ module.exports = {
     test.throws(
       function()
       {
-        /* eslint no-unused-vars: 0*/
-        const ua = new JsSIP.UA({ 'lalala': 'lololo' });
+        JsSIP.UA({ 'lalala': 'lololo' });
       },
-      // Error validation.
-      // NOTE: We should use JsSIP.Exceptions.ConfigurationError, but
-      // babel does not properly create Error subclasses.
-      function(error)
-      {
-        return error.name === 'CONFIGURATION_ERROR';
-      }
+      JsSIP.Exceptions.ConfigurationError
     );
 
     test.done();
@@ -29,12 +22,9 @@ module.exports = {
 
   'UA no WS connection' : function(test)
   {
-    const config = testUA.UA_CONFIGURATION;
-    const wsSocket = new JsSIP.WebSocketInterface(testUA.SOCKET_DESCRIPTION.url);
+    const ua = new JsSIP.UA(testUA.UA_CONFIGURATION);
 
-    config.sockets = wsSocket;
-
-    const ua = new JsSIP.UA(config);
+    console.log('LALALALALALA');
 
     test.ok(ua instanceof(JsSIP.UA));
 
@@ -91,7 +81,8 @@ module.exports = {
       function()
       {
         ua.sendMessage('sip:ibc@iñaki.ðđß', 'FAIL WITH INVALID_TARGET PLEASE');
-      }
+      },
+      JsSIP.Exceptions.TypeError
     );
 
     ua.stop();

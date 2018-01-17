@@ -2,23 +2,24 @@
 'use strict';
 /* eslint-enable strict */
 
-const fs = require('fs');
-const path = require('path');
-const exec = require('child_process').exec;
+/**
+ * Dependencies.
+ */
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const gulp = require('gulp');
-const babel = require('gulp-babel');
+const gutil = require('gulp-util');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const header = require('gulp-header');
 const expect = require('gulp-expect-file');
 const nodeunit = require('gulp-nodeunit-runner');
+const fs = require('fs');
+const path = require('path');
+const exec = require('child_process').exec;
 const eslint = require('gulp-eslint');
 const plumber = require('gulp-plumber');
-const log = require('fancy-log');
-const colors = require('ansi-colors');
 
 const PKG = require('./package.json');
 
@@ -38,7 +39,7 @@ const EXPECT_OPTIONS = {
 
 function logError(error)
 {
-  log(colors.red(String(error)));
+  gutil.log(gutil.colors.red(String(error)));
 }
 
 gulp.task('lint', function()
@@ -51,13 +52,6 @@ gulp.task('lint', function()
     .pipe(eslint.format());
 });
 
-gulp.task('babel', function()
-{
-  return gulp
-    .src([ 'lib/**/*.js' ])
-    .pipe(babel())
-    .pipe(gulp.dest('lib-es5'));
-});
 
 gulp.task('browserify', function()
 {
@@ -84,6 +78,7 @@ gulp.task('browserify', function()
     .pipe(gulp.dest('dist/'));
 });
 
+
 gulp.task('uglify', function()
 {
   const src = `dist/${ PKG.name }.js`;
@@ -96,6 +91,7 @@ gulp.task('uglify', function()
     .pipe(gulp.dest('dist/'));
 });
 
+
 gulp.task('test', function()
 {
   // var src = 'test/*.js';
@@ -103,9 +99,8 @@ gulp.task('test', function()
     'test/test-classes.js',
     'test/test-normalizeTarget.js',
     'test/test-parser.js',
-    'test/test-properties.js',
-    'test/test-UA-no-WebRTC.js',
-    'test/test-digestAuthentication.js'
+    'test/test-properties.js'
+    // 'test/test-UA-no-WebRTC.js'
   ];
 
   return gulp.src(src)
@@ -113,13 +108,14 @@ gulp.task('test', function()
     .pipe(nodeunit({ reporter: 'default' }));
 });
 
+
 gulp.task('grammar', function(cb)
 {
   const local_pegjs = path.resolve('./node_modules/.bin/pegjs');
   const Grammar_pegjs = path.resolve('lib/Grammar.pegjs');
   const Grammar_js = path.resolve('lib/Grammar.js');
 
-  log('grammar: compiling Grammar.pegjs into Grammar.js...');
+  gutil.log('grammar: compiling Grammar.pegjs into Grammar.js...');
 
   exec(`${local_pegjs } ${ Grammar_pegjs } ${ Grammar_js}`,
     function(error, stdout, stderr)
@@ -128,24 +124,23 @@ gulp.task('grammar', function(cb)
       {
         cb(new Error(stderr));
       }
-      log(`grammar: ${ colors.yellow('done')}`);
+      gutil.log(`grammar: ${ gutil.colors.yellow('done')}`);
 
       // Modify the generated Grammar.js file with custom changes.
-      log('grammar: applying custom changes to Grammar.js...');
+      gutil.log('grammar: applying custom changes to Grammar.js...');
 
       const grammar = fs.readFileSync('lib/Grammar.js').toString();
       let modified_grammar = grammar.replace(/throw new this\.SyntaxError\(([\s\S]*?)\);([\s\S]*?)}([\s\S]*?)return result;/, 'new this.SyntaxError($1);\n        return -1;$2}$3return data;');
 
       modified_grammar = modified_grammar.replace(/\s+$/mg, '');
       fs.writeFileSync('lib/Grammar.js', modified_grammar);
-      log(`grammar: ${ colors.yellow('done')}`);
+      gutil.log(`grammar: ${ gutil.colors.yellow('done')}`);
       cb();
     }
   );
 });
 
+
 gulp.task('devel', gulp.series('grammar'));
-
-gulp.task('dist', gulp.series('lint', 'babel', 'test', 'browserify', 'uglify'));
-
+gulp.task('dist', gulp.series('lint', 'test', 'browserify', 'uglify'));
 gulp.task('default', gulp.series('dist'));
