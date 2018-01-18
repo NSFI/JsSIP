@@ -1,17 +1,14 @@
 require('./include/common');
-const JsSIP = require('../');
+var JsSIP = require('../');
 
 
 module.exports = {
 
-  'valid targets' : function(test)
-  {
-    const domain = 'jssip.net';
+  'valid targets': function(test) {
+    var domain = 'jssip.net';
 
-    function test_ok(given_data, expected)
-    {
-      const uri = JsSIP.Utils.normalizeTarget(given_data, domain);
-
+    function test_ok(given_data, expected) {
+      var uri = JsSIP.Utils.normalizeTarget(given_data, domain);
       test.ok(uri instanceof(JsSIP.URI));
       test.strictEqual(uri.toString(), expected);
     }
@@ -42,13 +39,11 @@ module.exports = {
     test.done();
   },
 
-  'invalid targets' : function(test)
-  {
-    const domain = 'jssip.net';
+  'invalid targets': function(test) {
+    var domain = 'jssip.net';
 
-    function test_error(given_data)
-    {
-      test.deepEqual(JsSIP.Utils.normalizeTarget(given_data, domain), undefined);
+    function test_error(given_data) {
+       test.deepEqual(JsSIP.Utils.normalizeTarget(given_data, domain), undefined);
     }
 
     test_error(null);
