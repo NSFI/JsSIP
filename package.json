@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "browserify": "^14.3.0",
-    "gulp": "git+https://github.com/gulpjs/gulp.git#4.0",
+    "gulp": "^4.0.2",
     "gulp-expect-file": "0.0.7",
     "gulp-header": "1.8.8",
     "gulp-jshint": "^2.0.4",
@@ -45,7 +45,7 @@
     "jshint-stylish": "^2.2.1",
     "pegjs": "0.7.0",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^2.0.0"
   },
   "scripts": {
     "test": "gulp test"
