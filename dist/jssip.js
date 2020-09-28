@@ -18544,8 +18544,9 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
       this._connection.addEventListener('iceconnectionstatechange', function () {
         var state = _this12._connection.iceConnectionState; // TODO: Do more with different states.
+        // this._remoteHold 当hold时，rtp会超时，此时不发结束会话
 
-        if (state === 'failed') {
+        if (state === 'failed' && !self._remoteHold) {
           _this12.terminate({
             cause: JsSIP_C.causes.RTP_TIMEOUT,
             status_code: 408,
@@ -26187,7 +26188,6 @@ function functionBindPolyfill(context) {
  * This is the web browser implementation of `debug()`.
  */
 
-exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
 exports.load = load;
@@ -26353,18 +26353,14 @@ function formatArgs(args) {
 }
 
 /**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
+ * Invokes `console.debug()` when available.
+ * No-op when `console.debug` is not a "function".
+ * If `console.debug` is not available, falls back
+ * to `console.log`.
  *
  * @api public
  */
-function log(...args) {
-	// This hackery is required for IE8/9, where
-	// the `console.log` function doesn't have 'apply'
-	return typeof console === 'object' &&
-		console.log &&
-		console.log(...args);
-}
+exports.log = console.debug || console.log || (() => {});
 
 /**
  * Save `namespaces`.
@@ -26567,13 +26563,11 @@ function setup(env) {
 		debug.namespace = namespace;
 		debug.enabled = createDebug.enabled(namespace);
 		debug.useColors = createDebug.useColors();
-		debug.color = selectColor(namespace);
+		debug.color = createDebug.selectColor(namespace);
 		debug.destroy = destroy;
 		debug.extend = extend;
-		// Debug.formatArgs = formatArgs;
-		// debug.rawLog = rawLog;
 
-		// env-specific initialization logic for debug instances
+		// Env-specific initialization logic for debug instances
 		if (typeof createDebug.init === 'function') {
 			createDebug.init(debug);
 		}
